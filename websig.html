@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Daniel Cardoso - Carrazeda de Aniães</title>
+        <meta charset= "utf-8">
+        <link rel="stylesheet" type="text/css" href="websig.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+    </head>
+
+    <body>
+        <header>
+            <ul>
+                <li><a href="index.html">Página Inicial</a></li>
+                <li><a href="academico.html">Percurso Académico</a></li>
+                <li><a href="profissional.html">Experiência Profissional</a></li>
+                <li><a href="websig.html">Movimentos de Vertente em Carrazeda de Ansiães</a></li>
+                <li><a href="contactos.html">Contactos</a></li>
+            </ul>
+        </header>
+        
+        <div id="map" style="width: auto; height: 600px">i</div>
+
+        <!-- Add the Leaflet JavaScript library -->
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+        
+        <!-- Load Esri Leaflet from CDN -->
+        <script src="https://unpkg.com/esri-leaflet@2.5.1/dist/esri-leaflet.js"
+        integrity="sha512-q7X96AASUF0hol5Ih7AeZpRF6smJS55lcvy+GLWzJfZN+31/BQ8cgNx2FGF+IQSA4z2jHwB20vml+drmooqzzQ=="
+        crossorigin=""></script>
+        <!-- Include Leaflet.heat from CDN -->
+        <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+        <!-- Load Heatmap Feature Layer from CDN -->
+        <script src="https://unpkg.com/esri-leaflet-heatmap@2.0.0"></script>
+        <!-- Heatmap Feature Layer -->
+        <script src="https://unpkg.com/esri-leaflet-heatmap@2.0.0/dist/esri-leaflet-heatmap.js"
+        integrity="sha512-fSJJRfO4PK90PN9jKKBzBZmzlNRsR12QA/CqTTWgfUTfLMF1Nrx5ouOqlpzC8LQIP+Qz0/G4BlHSgxHrCLHuMA=="
+        crossorigin=""></script>
+
+        <!-- GeoJSON -->
+        <script src="GeoJSON/mv.geojson"></script>
+        <script src="GeoJSON/ferrovia.geojson"></script>
+        <script src="GeoJSON/carrazeda.geojson"> </script>
+        <script src="GeoJSON/ve.geojson"></script>
+        <script src="GeoJSON/mde.geojson"></script>
+        <script src="GeoJSON/susceptibilidade.geojson"></script>
+
+        <script>
+        // Create variable to hold map element, give initial settings to map
+            var map = L.map('map',{ center: [41.2443869568676, -7.307860291439048], zoom: 11});
+    
+        // Add ESRI tile layer to map element / Add OSM tile layer to map element
+            let esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+	            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'}).addTo(map);
+            
+            let osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
+
+        // Icon Movimentos de vertente
+            var MyIcon = L.icon({
+                iconUrl: 'imageicon/landslide.png',
+                iconSize: [32, 32], // size of the icon
+            });
+                        
+        // Movimentos de Vertente
+            var mov = L.geoJSON( movimv ,{pointToLayer: function(feature,latlng){
+                return L.marker(latlng,{icon: MyIcon});
+                },
+                onEachFeature: function(feature,layer){
+                let ano1 = feature.properties.ano;
+                let mes = feature.properties.mês;
+                let dia = feature.properties.dia;
+                let Freg = feature.properties.FREGUESIA;
+                let mortos = feature.properties.indead;
+                let feridos = feature.properties.ininjured;
+                layer.bindPopup('<h1>Data: </h1>' + ano1 + '/' + mes + '/' + dia + '<br><h2>Local:</h2> ' + Freg + '' + '<br><h2>Mortos:</h2> ' + mortos + '' + '<br><h2>Feridos:</h2> ' + feridos );
+            }}).addTo(map);
+        
+            // HEATMAP
+                var heatmap = L.esri.Heat.featureLayer({
+                    url: 'https://services5.arcgis.com/AMh9EzyFGgthLT1q/ArcGIS/rest/services/mvwgs/FeatureServer/0',
+                    radius: 80
+                });
+        
+        //Linha ferroviária
+            var ferrovia = L.geoJSON( linhaf , {color: 'red', opacity: 0.5,
+                onEachFeature: function(feature,layer){
+                    let nome = feature.properties.Name;
+                    layer.bindPopup('<h1>Nome da Ferrovia:</h1> ' + nome );
+                }});
+
+        // Carrazeda de Ansiães
+            var carrazeda = L.geoJSON( concelho ,{ color: '#795c34', opacity: 0.4,
+                onEachFeature: function(feature,layer){
+                let concelho = feature.properties.Concelho;
+                let freguesia = feature.properties.Freguesia;
+                let coord = feature.geometry.coordinates;
+                layer.bindPopup('<h1> Concelho: </h1>' + concelho + '<h1>Freguesia: </h1>' + freguesia);
+                }}).addTo(map);
+            
+        // MDE
+            function getAreaColor(feature){
+                console.log(feature)
+                switch (feature.properties.gridcode){
+                case 1 : return '#ffffe5' ;
+                case 2 : return '#fff7bc' ;
+                case 3 : return '#fee391' ;
+                case 4 : return '#fec44f' ;
+                case 5 : return '#fe9929' ;
+                case 6 : return '#ec7014' ;
+                case 7 : return '#cc4c02' ;
+                case 8 : return '#8c2d04' ;
+            }};
+
+            function areaStyle(feature){
+                return {
+                fillColor: getAreaColor(feature),
+                weight: 2,
+                opacity: 1,
+                color: "none",
+                fillOpacity: 0.7}
+            };
+
+            var mde = L.geoJSON( mde ,{ style: areaStyle });
+
+        // Susceptibilidade dos Movimentos de Vertente
+        function getAreaColor2(feature){
+                console.log(feature)
+                switch (feature.properties.GRIDCODE){
+                case 1 : return 'green' ;
+                case 2 : return 'yellow' ;
+                case 3 : return 'orange' ;
+                case 4 : return 'red' ;
+                }
+            };
+
+            function areaStyle2(feature){
+                return {
+                fillColor: getAreaColor2(feature),
+                weight: 2,
+                opacity: 1,
+                color: "none",
+                fillOpacity: 0.7
+                }
+            };
+
+            var scpt = L.geoJSON( smv ,{style: areaStyle2 });
+
+        // Vulnerabilidade Estrutural
+        function getAreaColor3(feature){
+                console.log(feature)
+                switch (feature.properties.gridcode){
+                case 1 : return 'green' ;
+                case 2 : return 'yellow' ;
+                case 3 : return 'orange' ;
+                case 4 : return 'red' ;
+                }
+            };
+
+            function areaStyle3(feature){
+                return {
+                fillColor: getAreaColor3(feature),
+                weight: 2,
+                opacity: 0.5 ,
+                color: "black",
+                fillOpacity: 0.5
+                }
+            };
+
+            var vulnerabilidade = L.geoJSON( ve ,{style: areaStyle3 });
+
+        // Layer Group and Layer Control
+            L.layerGroup(carrazeda).addTo(map);
+            L.layerGroup(mov).addTo(map);
+            L.layerGroup(heatmap).addTo(map);
+            L.layerGroup(ferrovia).addTo(map);
+            L.layerGroup(mde).addTo(map);
+            L.layerGroup(vulnerabilidade).addTo(map);
+            L.layerGroup(scpt).addTo(map);
+
+            let basemapControl = {
+                "ESRI Worldmap": esri,
+                "OpenStreetMap": osm
+            }
+
+            let layerControl = {
+                "Carrazeda de Ansiães": carrazeda,
+                "Movimentos de Vertente": mov,
+                "Heatmap de Movimentos de Vertente": heatmap,
+                "Linha Ferroviária": ferrovia,
+                "Modelo Digital de Elevação": mde,
+                "Vulnerabilidade Estrutural": vulnerabilidade,
+                "Susceptibilidade a Movimentos de Vertente": scpt,
+            }
+
+            // Add the control component, a layer list with checkboxes for operational layers and radio buttons for basemaps
+            L.control.layers( basemapControl, layerControl ).addTo( map )
+            
+        // Configurar Legendas
+            var legenda1 = L.control({ position: "bottomleft" });
+            legenda1.onAdd = function(map) {
+                var div = L.DomUtil.create("div", "legenda1");
+                    div.innerHTML += "<h4>Legenda</h4>";
+                    div.innerHTML += "<h4>Elevação (metros)</h4>";
+                    div.innerHTML += '<i style="background: #8c2d04"></i><span> 850 - 800 </span><br>';
+                    div.innerHTML += '<i style="background: #cc4c02"></i><span> 800 - 700  </span><br>';
+                    div.innerHTML += '<i style="background: #ec7014"></i><span> 700 - 600 </span><br>';
+                    div.innerHTML += '<i style="background: #fe9929"></i><span> 600 - 500 </span><br>';
+                    div.innerHTML += '<i style="background: #fec44f"></i><span> 500 - 400 </span><br>';
+                    div.innerHTML += '<i style="background: #fee391"></i><span> 400 - 300 </span><br>';
+                    div.innerHTML += '<i style="background: #fff7bc"></i><span> 300 - 200 </span><br>';
+                    div.innerHTML += '<i style="background: #ffffe5"></i><span> 200 - 100 </span><br>';
+                return div;
+            };
+            
+            var legenda2 = L.control({ position: "bottomleft" });
+            legenda2.onAdd = function(map) {
+                var div = L.DomUtil.create("div", "legenda2");
+                    div.innerHTML += "<h4>Legenda</h4>";
+                    div.innerHTML += "<h4>Nível de Vulnerabilidade Estrutural</h4>";
+                    div.innerHTML += '<i style="background: red"></i><span> Muito Elevado</span><br>';
+                    div.innerHTML += '<i style="background: orange"></i><span> Elevado </span><br>';
+                    div.innerHTML += '<i style="background: yellow"></i><span> Moderado </span><br>';
+                    div.innerHTML += '<i style="background: green"></i><span> Baixo </span><br>';
+                return div;
+            };
+            
+            var legenda3 = L.control({ position: "bottomleft" });
+            legenda3.onAdd = function(map) {
+               var div = L.DomUtil.create("div", "legenda3");
+                    div.innerHTML += "<h4>Legenda</h4>";
+                    div.innerHTML += "<h4>Nível de Susceptibilidade</h4>";
+                    div.innerHTML += '<i style="background: red"></i><span> Muito Elevado</span><br>';
+                    div.innerHTML += '<i style="background: orange"></i><span> Elevado</span><br>';
+                    div.innerHTML += '<i style="background: yellow"></i><span> Moderado </span><br>';
+                    div.innerHTML += '<i style="background: green"></i><span> Baixo </span><br>';
+                return div;
+            };
+        
+        //adicionar e retirar a legenda---------------------------------------------------
+
+            //legenda1
+            map.on('overlayadd', function (eventLayer) {
+                if (eventLayer.name === 'Modelo Digital de Elevação') {
+                legenda1.addTo(this); 
+            } else {  
+            }});
+            map.on('overlayremove', function (eventLayer) {
+                if (eventLayer.name === 'Modelo Digital de Elevação') {
+                this.removeControl(legenda1); 
+            } else {
+            }});
+
+            //legenda2
+            map.on('overlayadd', function (eventLayer2) {
+                if (eventLayer2.name === 'Vulnerabilidade Estrutural') {
+                legenda2.addTo(this); 
+            } else { 
+            }});
+            map.on('overlayremove', function (eventLayer2) {
+                if (eventLayer2.name === 'Vulnerabilidade Estrutural') {
+                this.removeControl(legenda2); 
+            } else {
+            }});
+
+            //legenda3
+            map.on('overlayadd', function (eventLayer3) {
+                if (eventLayer3.name === 'Susceptibilidade a Movimentos de Vertente') {
+                legenda3.addTo(this); 
+            } else { 
+            }});
+            map.on('overlayremove', function (eventLayer3) {
+                if (eventLayer3.name === 'Susceptibilidade') {
+                this.removeControl(legenda3); 
+            } else {
+            }});
+
+            // Escala
+                var scale = L.control.scale();
+                scale.addTo(map);
+
+        </script>
+        <footer>
+            <p>Daniel Cardoso</p>
+        </footer>       
+    </body>
+</html>
+
