@@ -1,8 +1,12 @@
-html {
-  height: 100%;
-  background-image: url('multimedia/backg.jpg');
-  background-repeat: no-repeat;
-  background-size: cover;
+.background {
+    background-image: url('multimedia/backg.jpg');
+    background-size: cover;
+    background-repeat: repeat-x;
+    background-position-y: bottom;
+}
+
+html, body, .background {
+    height: 100%;
 }
 
 body{
