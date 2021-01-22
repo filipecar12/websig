@@ -41,6 +41,7 @@
 
         <!-- GeoJSON -->
         <script src="GeoJSON/mv.geojson"></script>
+        <script src="GeoJSON/bombeiros.geojson"></script>
         <script src="GeoJSON/ferrovia.geojson"></script>
         <script src="GeoJSON/carrazeda.geojson"> </script>
         <script src="GeoJSON/ve.geojson"></script>
@@ -60,9 +61,15 @@
         // Icon Movimentos de vertente
             var MyIcon = L.icon({
                 iconUrl: 'imageicon/landslide.png',
-                iconSize: [32, 32], // size of the icon
+                iconSize: [32, 32] // size of the icon
             });
-                        
+        
+        //Icon Bombeiros
+            var MyIcon2 = L.icon({
+                iconUrl: 'imageicon/firefighter.png',
+                iconSize: [32, 32]
+            })
+
         // Movimentos de Vertente
             var mov = L.geoJSON( movimv ,{pointToLayer: function(feature,latlng){
                 return L.marker(latlng,{icon: MyIcon});
@@ -83,6 +90,18 @@
                     radius: 80
                 });
         
+        //Bombeiros Voluntários
+                var bombeiros = L.geoJSON ( bb , {pointToLayer: function(feature,latlng){
+                return L.marker(latlng,{icon: MyIcon2});
+                },
+                onEachFeature: function(feature,layer){
+                let nome = feature.properties.Designaç;
+                let telefone = feature.properties.Contacto;
+                let morada = feature.properties.Morada;
+                layer.bindPopup('<h1>Designação: </h1>' + nome + '<br><h2>Morada:</h2> ' + morada + '<br><h2>Contacto:</h2> ' + telefone);
+            }}).addTo(map);
+
+
         //Linha ferroviária
             var ferrovia = L.geoJSON( linhaf , {color: 'red', opacity: 0.5,
                 onEachFeature: function(feature,layer){
@@ -173,6 +192,7 @@
         // Layer Group and Layer Control
             L.layerGroup(carrazeda).addTo(map);
             L.layerGroup(mov).addTo(map);
+            L.layerGroup(bombeiros).addTo(map);
             L.layerGroup(heatmap).addTo(map);
             L.layerGroup(ferrovia).addTo(map);
             L.layerGroup(mde).addTo(map);
@@ -187,6 +207,7 @@
             let layerControl = {
                 "Carrazeda de Ansiães": carrazeda,
                 "Movimentos de Vertente": mov,
+                "Bombeiros Voluntários": bombeiros,
                 "Heatmap de Movimentos de Vertente": heatmap,
                 "Linha Ferroviária": ferrovia,
                 "Modelo Digital de Elevação": mde,
