@@ -1,5 +1,6 @@
-html {
-  height: 100%
+html { 
+  background: url('multimedia/backg.jpg') no-repeat center center fixed; 
+  background-size: cover;
 }
 
 body{
