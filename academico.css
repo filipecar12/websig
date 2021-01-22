@@ -9,7 +9,12 @@ html, body, .background {
     height: 100%;
 }
 
+
 body{
+    background-color: grey;
+    background-image: url('multimedia/backg.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
     font-family: Arial, Helvetica, sans-serif;
     color: black;
 }
