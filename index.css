@@ -8,8 +8,6 @@ html {
 
 body{
     background-image: url('multimedia/backg.jpg');
-    background-repeat: no-repeat;
-    background-size: cover;
     font-family: Arial, Helvetica, sans-serif;
     color: black;
 }
